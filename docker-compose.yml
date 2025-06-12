@@ -1,0 +1,79 @@
+services:
+  mongodb-primary:
+    image: bitnami/mongodb:${MONGODB_VERSION}
+    container_name: mongodb-primary
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_primary_data:/bitnami
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: ${MONGODB_HOST_IP}
+      MONGODB_PORT_NUMBER: "27017"
+      MONGODB_REPLICA_SET_MODE: "primary"
+      MONGODB_REPLICA_SET_NAME: "replicaset"
+      MONGODB_ROOT_PASSWORD: ${MONGODB_DEFAULT_PASSWORD}
+      MONGODB_REPLICA_SET_KEY: ${MONGODB_DEFAULT_KEY}
+      MONGODB_ENABLE_JOURNAL: "yes"
+      MONGODB_ENABLE_IPV6: "no"
+    networks:
+      - yan
+    restart: unless-stopped
+
+  mongodb-secondary:
+    image: bitnami/mongodb:${MONGODB_VERSION}
+    container_name: mongodb-secondary
+    ports:
+      - 27018:27017
+    volumes:
+      - mongodb_secondary_data:/bitnami
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: ${MONGODB_HOST_IP}
+      MONGODB_ADVERTISED_PORT_NUMBER: "27018"
+      MONGODB_PORT_NUMBER: "27017"
+      MONGODB_REPLICA_SET_MODE: "secondary"
+      MONGODB_REPLICA_SET_NAME: "replicaset"
+      MONGODB_INITIAL_PRIMARY_HOST: "mongodb-primary"
+      MONGODB_INITIAL_PRIMARY_PORT_NUMBER: "27017"
+      MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD: ${MONGODB_DEFAULT_PASSWORD}
+      MONGODB_REPLICA_SET_KEY: ${MONGODB_DEFAULT_KEY}
+      MONGODB_ENABLE_JOURNAL: "yes"
+      MONGODB_ENABLE_IPV6: "no"
+    networks:
+      - yan
+    depends_on:
+      - mongodb-primary
+    restart: unless-stopped
+
+  mongodb-arbiter:
+    image: bitnami/mongodb:${MONGODB_VERSION}
+    container_name: mongodb-arbiter
+    ports:
+      - 27019:27017
+    volumes:
+      - mongodb_arbiter_data:/bitnami
+    environment:
+      MONGODB_ADVERTISED_HOSTNAME: ${MONGODB_HOST_IP}
+      MONGODB_ADVERTISED_PORT_NUMBER: "27019"
+      MONGODB_PORT_NUMBER: "27017"
+      MONGODB_REPLICA_SET_MODE: "arbiter"
+      MONGODB_REPLICA_SET_NAME: "replicaset"
+      MONGODB_INITIAL_PRIMARY_HOST: "mongodb-primary"
+      MONGODB_INITIAL_PRIMARY_PORT_NUMBER: "27017"
+      MONGODB_INITIAL_PRIMARY_ROOT_PASSWORD: ${MONGODB_DEFAULT_PASSWORD}
+      MONGODB_REPLICA_SET_KEY: ${MONGODB_DEFAULT_KEY}
+      MONGODB_ENABLE_JOURNAL: "yes"
+      MONGODB_ENABLE_IPV6: "no"
+    networks:
+      - yan
+    depends_on:
+      - mongodb-primary
+    restart: unless-stopped
+
+volumes:
+  mongodb_primary_data:
+  mongodb_secondary_data:
+  mongodb_arbiter_data:
+
+networks:
+  yan:
+    driver: bridge
