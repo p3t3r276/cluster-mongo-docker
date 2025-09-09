@@ -11,7 +11,7 @@ On `Windows`: Look for your "Ethernet adapter" or "Wi-Fi adapter" and find the "
 
 2. Start mongo
 ```bash
-docker-compose -f cluster2.yml up -d --build
+docker-compose -f cluster.yml up -d --build
 ```
 
 3. Config cluster
@@ -27,6 +27,19 @@ rs.initiate(
       { _id: 0, host: "mongodb-primary:27017"  },  
       { _id: 1, host: "mongodb-secondary:27017" },
       { _id: 2, host: "mongodb-arbiter:27017", "arbiterOnly": true }
+    ]
+  }
+);
+```
+
+```javascript
+rs.initiate(
+  {
+    _id: "rs0",
+    members: [
+      { _id: 0, host: "host.docker.internal:27017", "priority": 2  },
+      { _id: 1, host: "host.docker.internal:27018", "priority": 1 },
+      { _id: 2, host: "host.docker.internal:27019", "priority": 0 }
     ]
   }
 );
