@@ -22,19 +22,6 @@ Paste this
 ```javascript
 rs.initiate(
   {
-    _id: "replicaset",
-    members: [
-      { _id: 0, host: "mongodb-primary:27017"  },  
-      { _id: 1, host: "mongodb-secondary:27017" },
-      { _id: 2, host: "mongodb-arbiter:27017", "arbiterOnly": true }
-    ]
-  }
-);
-```
-
-```javascript
-rs.initiate(
-  {
     _id: "rs0",
     members: [
       { _id: 0, host: "mongo1:27017", "priority": 2  },
@@ -55,7 +42,7 @@ docker exec -it mongo1 mongosh --eval "rs.status()"
 
 5. Shut down
 ```bash
-docker-compose -f cluster2.yml down --rmi local --volumes 
+docker-compose -f cluster.yml down --rmi local --volumes 
 ```
 
 `Note`: Check also `host.docker.internal`
@@ -72,5 +59,5 @@ mongodb://root:{MONGODB_DEFAULT_PASSWORD}@localhost:27017,localhost:27018,localh
 Check status
 
 ```bash
-docker exec -it mongodb-primary mongosh -u root -p admin123 --eval "rs.status()"
+docker exec -it mongo1 mongosh -u root -p admin123 --eval "rs.status()"
 ```

@@ -14,48 +14,14 @@ On `Windows`: Look for your "Ethernet adapter" or "Wi-Fi adapter" and find the "
 docker-compose -f cluster.yml up -d --build
 ```
 
-3. Config cluster
+3. Check clsuter status
 ```bash
-docker exec -it mongo1 mongosh
-```
-Paste this
-```javascript
-rs.initiate(
-  {
-    _id: "replicaset",
-    members: [
-      { _id: 0, host: "mongodb-primary:27017"  },  
-      { _id: 1, host: "mongodb-secondary:27017" },
-      { _id: 2, host: "mongodb-arbiter:27017", "arbiterOnly": true }
-    ]
-  }
-);
+docker exec -it mongo-primary mongosh --eval "rs.status()"
 ```
 
-```javascript
-rs.initiate(
-  {
-    _id: "rs0",
-    members: [
-      { _id: 0, host: "mongo1:27017", "priority": 2  },
-      { _id: 1, host: "mongo2:27018", "priority": 1 },
-      { _id: 2, host: "mongo3:27019", "priority": 0 }
-    ]
-  }
-);
-```
-Exit mongosh
+4. Shut down
 ```bash
-exit
-```
-4. Check clsuter status
-```bash
-docker exec -it mongo1 mongosh --eval "rs.status()"
-```
-
-5. Shut down
-```bash
-docker-compose -f cluster2.yml down --rmi local --volumes 
+docker-compose -f bitnami.yml down --rmi local --volumes 
 ```
 
 `Note`: Check also `host.docker.internal`
@@ -72,5 +38,5 @@ mongodb://root:{MONGODB_DEFAULT_PASSWORD}@localhost:27017,localhost:27018,localh
 Check status
 
 ```bash
-docker exec -it mongodb-primary mongosh -u root -p admin123 --eval "rs.status()"
+docker exec -it mongodb-primary mongosh -u root -p {MONGODB_DEFAULT_PASSWORD} --eval "rs.status()"
 ```
