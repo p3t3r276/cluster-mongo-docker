@@ -3,8 +3,13 @@
 Using `docker` and `bitnami/mongodb` image
 
 1. Get your machine IP address
+MacOS and Linux
 ```bash
 ipconfig getifaddr en0
+```
+For windows
+```powershell
+ipconfig
 ```
 On `macOS` and `Linux` Look for the IP address associated with your main network interface (e.g., `eth0`, `enp0s3`, `wlo1`). It will likely be in a range like `192.168.x.x` or `10.0.x.x`
 On `Windows`: Look for your "Ethernet adapter" or "Wi-Fi adapter" and find the "IPv4 Address."
@@ -18,11 +23,11 @@ docker-compose -f cluster.yml up -d --build
 ```bash
 docker exec -it mongo1 mongosh
 ```
-Paste this
+Run this command to connec
 ```javascript
 rs.initiate(
   {
-    _id: "replicaset",
+    _id: "rs0",
     members: [
       { _id: 0, host: "mongodb-primary:27017"  },  
       { _id: 1, host: "mongodb-secondary:27017" },
@@ -38,8 +43,8 @@ rs.initiate(
     _id: "rs0",
     members: [
       { _id: 0, host: "mongo1:27017", "priority": 2  },
-      { _id: 1, host: "mongo2:27018", "priority": 1 },
-      { _id: 2, host: "mongo3:27019", "priority": 0 }
+      { _id: 1, host: "mongo2:27017", "priority": 1 },
+      { _id: 2, host: "mongo3:27017", "priority": 0, "arbiterOnly": true }
     ]
   }
 );

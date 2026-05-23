@@ -7,6 +7,8 @@ services:
       - "27017:27017"
     volumes:
       - mongo1-data:/data/db
+    networks:
+      - mongo-net
 
   mongo2:
     image: mongo:latest
@@ -16,6 +18,8 @@ services:
       - "27018:27017"
     volumes:
       - mongo2-data:/data/db
+    networks:
+      - mongo-net
 
   mongo3:
     image: mongo:latest
@@ -25,8 +29,14 @@ services:
       - "27019:27017"
     volumes:
       - mongo3-data:/data/db
+    networks:
+      - mongo-net
 
 volumes:
   mongo1-data:
   mongo2-data:
   mongo3-data:
+
+networks:
+  mongo-net:
+    driver: bridge
