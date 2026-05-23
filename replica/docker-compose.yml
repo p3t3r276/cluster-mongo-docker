@@ -1,0 +1,61 @@
+services:
+  mongo1:
+    image: mongo:7.0
+    container_name: mongo1
+    hostname: mongo1
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo1_data:/data/db
+      - ./mongo-keyfile:/data/keyfile:ro
+      - ./init-replicaset.js:/docker-entrypoint-initdb.d/init-replicaset.js:ro
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /data/keyfile
+    networks:
+      - mongo-net
+
+  mongo2:
+    image: mongo:7.0
+    container_name: mongo2
+    hostname: mongo2
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo2_data:/data/db
+      - ./mongo-keyfile:/data/keyfile:ro
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /data/keyfile
+    networks:
+      - mongo-net
+
+  mongo3:
+    image: mongo:7.0
+    container_name: mongo3
+    hostname: mongo3
+    restart: unless-stopped
+    ports:
+      - "27019:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo3_data:/data/db
+      - ./mongo-keyfile:/data/keyfile:ro
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /data/keyfile
+    networks:
+      - mongo-net
+
+volumes:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+
+networks:
+  mongo-net:
+    driver: bridge
