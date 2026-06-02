@@ -1,0 +1,95 @@
+services:
+  mongo1:
+    image: mongo:7.0
+    container_name: mongo1
+    hostname: mongo1
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo1_data:/data/db
+      - ./mongo-keyfile:/data/keyfile:ro
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /data/keyfile --port 27017
+    healthcheck:
+      test: mongosh --host localhost:27017 -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD} --authenticationDatabase admin --eval "db.adminCommand('ping')" --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mongo-net
+
+  mongo2:
+    image: mongo:7.0
+    container_name: mongo2
+    hostname: mongo2
+    restart: unless-stopped
+    ports:
+      - "27018:27018"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo2_data:/data/db
+      - ./mongo-keyfile:/data/keyfile:ro
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /data/keyfile --port 27018
+    healthcheck:
+      test: mongosh --host localhost:27018 -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD} --authenticationDatabase admin --eval "db.adminCommand('ping')" --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mongo-net
+
+  mongo3:
+    image: mongo:7.0
+    container_name: mongo3
+    hostname: mongo3
+    restart: unless-stopped
+    ports:
+      - "27019:27019"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+    volumes:
+      - mongo3_data:/data/db
+      - ./mongo-keyfile:/data/keyfile:ro
+    command: mongod --replSet rs0 --bind_ip_all --keyFile /data/keyfile --port 27019
+    healthcheck:
+      test: mongosh --host localhost:27019 -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD} --authenticationDatabase admin --eval "db.adminCommand('ping')" --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+    networks:
+      - mongo-net
+
+  # mongo-init:
+  #   image: mongo:7.0
+  #   container_name: mongo-init
+  #   depends_on:
+  #     mongo1:
+  #       condition: service_healthy
+  #     mongo2:
+  #       condition: service_healthy
+  #     mongo3:
+  #       condition: service_healthy
+  #   volumes:
+  #     - ./init-replicaset.js:/init-replicaset.js:ro
+  #   command: mongosh --host mongo1:27017 -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD} --authenticationDatabase admin /init-replicaset.js
+  #   networks:
+  #     - mongo-net
+  #   restart: "no"
+
+volumes:
+  mongo1_data:
+  mongo2_data:
+  mongo3_data:
+
+networks:
+  mongo-net:
+    driver: bridge
