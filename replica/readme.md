@@ -23,3 +23,11 @@ docker exec -it mongo2 mongosh \
 --eval "rs.status().members.forEach(m => print(m.name, m.stateStr, m.health))" \
 --port 27018
 ```
+```powershell
+.\setup.ps1
+```
+
+```bash
+chmod +x setup.sh
+./setup.sh
+```
