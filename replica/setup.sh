@@ -32,7 +32,7 @@ if [ ! -f ./mongo-keyfile ]; then
 fi
 
 # 2. Start the containers
-docker-compose -f new.yml up -d --build
+docker compose -f new.yml up -d --build
 
 echo "Waiting for MongoDB nodes to start..."
 sleep 10
