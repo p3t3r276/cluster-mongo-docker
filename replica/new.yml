@@ -68,23 +68,6 @@ services:
     networks:
       - mongo-net
 
-  # mongo-init:
-  #   image: mongo:7.0
-  #   container_name: mongo-init
-  #   depends_on:
-  #     mongo1:
-  #       condition: service_healthy
-  #     mongo2:
-  #       condition: service_healthy
-  #     mongo3:
-  #       condition: service_healthy
-  #   volumes:
-  #     - ./init-replicaset.js:/init-replicaset.js:ro
-  #   command: mongosh --host mongo1:27017 -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD} --authenticationDatabase admin /init-replicaset.js
-  #   networks:
-  #     - mongo-net
-  #   restart: "no"
-
 volumes:
   mongo1_data:
   mongo2_data:
