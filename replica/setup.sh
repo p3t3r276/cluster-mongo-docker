@@ -27,8 +27,8 @@ echo $MONGO_ROOT_PASSWORD
 
 # 1. Check if the keyfile exists, if not generate it
 if [ ! -f ./mongo-keyfile ]; then
-    docker run --rm -v "${PWD}:/output" mongo:7.0 \
-        bash -c "openssl rand -base64 756 > /output/mongo-keyfile && chmod 400 /output/mongo-keyfile && chown 999:999 /output/mongo-keyfile"
+    docker run --rm -v "${PWD}":/output -w /output mongo:7.0 \
+        bash -c "openssl rand -base64 756 > ./mongo-keyfile && chmod 400 ./mongo-keyfile && chown 999:999 ./mongo-keyfile"
 fi
 
 # 2. Start the containers
