@@ -51,7 +51,7 @@ services:
         cp /data/keyfile /tmp/mongo-keyfile
         chmod 400 /tmp/mongo-keyfile
         chown mongodb:mongodb /tmp/mongo-keyfile
-        exec docker-entrypoint.sh mongod --replSet rs0 --keyFile /tmp/keyfile --auth --bind_ip_all --port 27018
+        exec docker-entrypoint.sh mongod --replSet rs0 --keyFile /tmp/mongo-keyfile --auth --bind_ip_all --port 27018
     healthcheck:
       test: mongosh --host localhost:27018 -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD} --authenticationDatabase admin --eval "db.adminCommand('ping')" --quiet
       interval: 10s
@@ -82,7 +82,7 @@ services:
         cp /data/keyfile /tmp/mongo-keyfile
         chmod 400 /tmp/mongo-keyfile
         chown mongodb:mongodb /tmp/mongo-keyfile
-        exec docker-entrypoint.sh mongod --replSet rs0 --keyFile /tmp/keyfile --auth --bind_ip_all --port 27019
+        exec docker-entrypoint.sh mongod --replSet rs0 --keyFile /tmp/mongo-keyfile --auth --bind_ip_all --port 27019
     healthcheck:
       test: mongosh --host localhost:27019 -u ${MONGO_ROOT_USER} -p ${MONGO_ROOT_PASSWORD} --authenticationDatabase admin --eval "db.adminCommand('ping')" --quiet
       interval: 10s
