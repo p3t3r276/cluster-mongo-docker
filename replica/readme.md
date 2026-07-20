@@ -15,6 +15,20 @@ Connection string:
 mongodb://admin:supersecretpassword@mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0&authSource=admin
 ```
 
+> **Host name resolution required.** The replica set advertises its members as
+> `mongo1`/`mongo2`/`mongo3`. With `?replicaSet=rs0`, the driver uses those advertised
+> names (not the URI seeds) to reach the nodes, so the host must resolve them to
+> `127.0.0.1` — otherwise the connection times out even though the cluster is healthy.
+> `setup-podman.ps1` adds these entries automatically (it may prompt for admin once).
+> To add them manually, append to `%windir%\System32\drivers\etc\hosts` (as
+> Administrator):
+>
+> ```text
+> 127.0.0.1 mongo1
+> 127.0.0.1 mongo2
+> 127.0.0.1 mongo3
+> ```
+
 Connnect to mongo2
 ```bash
 docker exec -it mongo2 mongosh \

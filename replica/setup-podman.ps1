@@ -1,3 +1,36 @@
+# Ensure the host can resolve the replica-set member names (mongo1/mongo2/mongo3).
+# The replica set advertises these internal container hostnames, so a client on the
+# Windows host must resolve them to 127.0.0.1 or replica-set discovery times out.
+function Add-MongoHostsEntries {
+    $hostsPath = "$env:windir\System32\drivers\etc\hosts"
+    $names = @("mongo1", "mongo2", "mongo3")
+    $current = Get-Content -Path $hostsPath -ErrorAction SilentlyContinue
+    $toAdd = foreach ($n in $names) {
+        if (-not ($current | Select-String -Pattern "^\s*\d{1,3}(\.\d{1,3}){3}\s+$n(\s|$)" -Quiet)) {
+            "127.0.0.1`t$n"
+        }
+    }
+
+    if (-not $toAdd) {
+        Write-Host "Hosts entries already present."
+        return
+    }
+
+    $isAdmin = ([Security.Principal.WindowsPrincipal] `
+            [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+        [Security.Principal.WindowsBuiltinRole]::Administrator)
+
+    if ($isAdmin) {
+        Add-Content -Path $hostsPath -Value $toAdd
+    }
+    else {
+        $joined = ($toAdd -join "','")
+        $cmd = "Add-Content -Path '$hostsPath' -Value @('$joined')"
+        Start-Process powershell -Verb RunAs -Wait -ArgumentList "-NoProfile", "-Command", $cmd
+    }
+    Write-Host "Added hosts entries: $($toAdd -join ', ')"
+}
+
 # Check if .env file exists
 if (Test-Path ".env") {
 
@@ -35,6 +68,9 @@ if (Test-Path ".env") {
 
 Write-Host $env:MONGO_ROOT_USER
 Write-Host $env:MONGO_ROOT_PASSWORD
+
+# Make mongo1/mongo2/mongo3 resolvable from the host (see function above).
+Add-MongoHostsEntries
 
 if (-not (Test-Path ./mongo-keyfile)) {
     [Convert]::ToBase64String((1..756 | ForEach-Object { [byte](Get-Random -Minimum 0 -Maximum 256) })) | Out-File -Encoding ascii mongo-keyfile
@@ -95,3 +131,7 @@ podman exec mongo1 mongosh `
     -p $env:MONGO_ROOT_PASSWORD `
     --authenticationDatabase admin `
     --eval "rs.status().members.forEach(m => print(m.name, m.stateStr))"
+
+Write-Host ""
+Write-Host "Connect with:"
+Write-Host "mongodb://$($env:MONGO_ROOT_USER):$($env:MONGO_ROOT_PASSWORD)@mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0&authSource=admin"
