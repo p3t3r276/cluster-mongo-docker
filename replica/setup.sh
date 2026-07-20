@@ -3,6 +3,32 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+# Ensure the host can resolve the replica-set member names (mongo1/mongo2/mongo3).
+# The replica set advertises these internal container hostnames, so a client on the
+# host must resolve them to 127.0.0.1 or replica-set discovery times out.
+add_mongo_hosts_entries() {
+    local hosts_file="/etc/hosts"
+    local names=("mongo1" "mongo2" "mongo3")
+    local to_add=()
+    for n in "${names[@]}"; do
+        if ! grep -qE "^[[:space:]]*[0-9]{1,3}(\.[0-9]{1,3}){3}[[:space:]]+${n}([[:space:]]|$)" "$hosts_file"; then
+            to_add+=("127.0.0.1"$'\t'"${n}")
+        fi
+    done
+
+    if [ ${#to_add[@]} -eq 0 ]; then
+        echo "Hosts entries already present."
+        return
+    fi
+
+    if [ "$(id -u)" -eq 0 ]; then
+        printf '%s\n' "${to_add[@]}" >> "$hosts_file"
+    else
+        printf '%s\n' "${to_add[@]}" | sudo tee -a "$hosts_file" >/dev/null
+    fi
+    echo "Added hosts entries: ${to_add[*]}"
+}
+
 # Check if .env file exists
 if [ -f .env ]; then
     # Read file line by line, ignoring comments and blank lines
@@ -24,6 +50,9 @@ fi
 
 echo $MONGO_ROOT_USER
 echo $MONGO_ROOT_PASSWORD
+
+# Make mongo1/mongo2/mongo3 resolvable from the host (see function above).
+add_mongo_hosts_entries
 
 # 1. Check if the keyfile exists, if not generate it
 if [ ! -f ./mongo-keyfile ]; then
@@ -100,3 +129,7 @@ docker exec mongo1 mongosh \
     -p "$MONGO_ROOT_PASSWORD" \
     --authenticationDatabase admin \
     --eval "rs.status().members.forEach(m => print(m.name, m.stateStr))"
+
+echo ""
+echo "Connect with:"
+echo "mongodb://${MONGO_ROOT_USER}:${MONGO_ROOT_PASSWORD}@mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=rs0&authSource=admin"
