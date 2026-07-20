@@ -74,8 +74,6 @@ Add-MongoHostsEntries
 
 if (-not (Test-Path ./mongo-keyfile)) {
     [Convert]::ToBase64String((1..756 | ForEach-Object { [byte](Get-Random -Minimum 0 -Maximum 256) })) | Out-File -Encoding ascii mongo-keyfile
-
-    # icacls mongo-keyfile /inheritance:r /grant:r "${env:USERNAME}:(R)"
 }
 
 podman compose -f new2.yml up -d --build

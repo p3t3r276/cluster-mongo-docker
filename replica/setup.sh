@@ -57,11 +57,11 @@ add_mongo_hosts_entries
 # 1. Check if the keyfile exists, if not generate it
 if [ ! -f ./mongo-keyfile ]; then
     docker run --rm -v "${PWD}":/output -w /output mongo:7.0 \
-        bash -c "openssl rand -base64 756 > ./mongo-keyfile && chmod 400 ./mongo-keyfile && chown 999:999 ./mongo-keyfile"
+        bash -c "openssl rand -base64 756 > ./mongo-keyfile"
 fi
 
 # 2. Start the containers
-docker compose -f new.yml up -d --build
+docker compose -f new2.yml up -d --build
 
 echo "Waiting for MongoDB nodes to start..."
 sleep 10
